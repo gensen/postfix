@@ -48,11 +48,15 @@ execute "postmap-sasl_passwd" do
   action :nothing
 end
 
+smtp_sasl = Chef::EncryptedDataBagItem.load("secrets", "postfix")
+
 template "/etc/postfix/sasl_passwd" do
   source "sasl_passwd.erb"
   owner "root"
   group "root"
   mode 0400
+  variables(:smtp_sasl_passwd => smtp_sasl["passwd"],
+            :smtp_sasl_user_name => smtp_sasl["user"])
   notifies :run, "execute[postmap-sasl_passwd]", :immediately
   notifies :restart, "service[postfix]"
 end
